@@ -1,2 +1,10 @@
 huggingface_hub
 python-dotenv
+
+# dependencies for RAG 
+docutils
+langchain-text-splitters
+langchain-chroma
+tqdm
+sentence_transformers
+torch

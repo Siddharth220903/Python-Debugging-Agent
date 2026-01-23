@@ -29,15 +29,17 @@ if __name__ == "__main__":
     model_api = model_inferece.initializeInferenceAPI()
 
     for attempt in range(max_attempts):
-        logger.info(f"Attempt {attempt + 1} of {max_attempts}:\n")
-
+        print(f"Attempt {attempt + 1} of {max_attempts}.")
+        logger.info(f"Attempt {attempt + 1} of {max_attempts}.")
         logger.info("Starting execution")
         output, success = executor.executePythonFile(file_path)
 
         if success:
+            print("Code Execution success")
             logger.info("Code executed successfully without errors.")
             break
         else:
+            print("Code Excution Failed. Trying to get inference from LLM.")
             logger.info("Reading the erroneous code from file")
             code_snippet = read_python_code.read_python_file(file_path)
 
