@@ -1,7 +1,11 @@
 from dotenv import load_dotenv
 from huggingface_hub import InferenceClient
 import os
+import json
 import logging
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from retriever import retriever
 logger = logging.getLogger(__name__)
 
 env_path = "./.env"
@@ -41,25 +45,51 @@ def getCodeCorrection(api: InferenceClient, code_snippet: str, error_message: st
     :rtype: str
     """
 
-    response = api.chat_completion(
+    logger.info("Initializing Retrieval Tool.")
+    tool = retriever.RetrievalTool()
+    try: 
+        retrieved_docs = tool.retrieve(terminal_error=error_message)
+        print("Found relevant resources from documentation.")
+        logger.info("Successfully Retrieved source.")
+    except retriever.NoDocumentError:
+         retrieved_docs = ""
+         print("No relevant document found.")
+         logger.info("No Relevant Data Found.")
+
     messages = [
-    {
-        "role": "system", 
-        "content": (
-            "You are an expert Python developer. Your task is to fix the provided code error. "
-            "Return the response strictly as a JSON object with a single key 'fixed_code'. "
-            "The value must be the complete, corrected Python code as a string. "
-            "Do not include explanations, markdown blocks, or any text outside the JSON structure."
-        )
-    },
-    {
-        "role": "user", 
-        "content": f"Code:\n{code_snippet}\n\nError:\n{error_message}"
-    }
-    ],
-    max_tokens=500
+        {
+            "role": "system", 
+            "content": (
+                "You are an expert Python developer specialized in Python 3.11. "
+                "Your task is to fix the provided code error using the provided Documentation Resources. "
+                "If the Documentation Resources contain specific usage examples or rules, prioritize them. "
+                "Return the response STRICTLY as a JSON object with a single key 'fixed_code'. "
+                "The value must be the complete, corrected Python code as a string. "
+                "Do not include explanations, markdown blocks, or any text outside the JSON structure."
+            )
+        },
+        {
+            "role": "user", 
+            "content": (
+                f"--- DOCUMENTATION RESOURCES ---\n{retrieved_docs}\n\n"
+                f"--- ORIGINAL CODE ---\n{code_snippet}\n\n"
+                f"--- TERMINAL ERROR ---\n{error_message}"
+            )
+        }
+    ]
+    response = api.chat_completion(
+        messages = messages,
+        max_tokens=1500
     )
     logger.info("Received code correction from inference API.")
+
+    try:
+        json.loads(response.choices[0].message.content)
+        logger.info("Valid JSON format obtained.")
+    except json.JSONDecodeError:
+            raise Exception(f"Invalid JSON format from model.")
+
+    
     return response.choices[0].message.content
 
 

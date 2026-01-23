@@ -1,10 +1,24 @@
-def add(a, b):
-    return a + b
+class User:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
 
-if __name__ == '__main__':
-    try:
-        result = add(5, 4)
-    except TypeError as e:
-        print(f'Error: {e}')
-    else:
-        print(f"Sum: {result}")
+    def can_vote(self):
+        if self.age >= 18:
+            return True
+        else:
+            return False
+
+def process_users(users):
+    results = []
+    for user in users:
+        results.append({"name": user.name, "can_vote": user.can_vote()})
+
+    return results
+
+users = [
+    User("Alice", 30),
+    User("Bob", 15),
+]
+
+print(process_users(users))
