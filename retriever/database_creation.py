@@ -4,6 +4,8 @@ import chromadb
 from chromadb.utils import embedding_functions
 import os
 from tqdm import tqdm
+from pathlib import Path
+script_dir = Path(__file__).parent
 
 
 def readPythonDocs(base_directory):
@@ -51,7 +53,7 @@ def chunkContent(all_content):
     return final_chunks
 
 def embdDbStore(chunks): 
-    db_directory = "./python_docs_vector_db"
+    db_directory = f"{script_dir}/python_docs_vector_db"
     
     embedding_model = embedding_functions.DefaultEmbeddingFunction()
     client = chromadb.PersistentClient(path=db_directory)
@@ -85,7 +87,7 @@ def embdDbStore(chunks):
 
 if __name__ == "__main__":
 
-    docs_data = readPythonDocs('./python-3.11.14-docs-text/')
+    docs_data = readPythonDocs(f'{script_dir}/python-3.11.14-docs-text/')
 
     # Separators based on structure of .txt files 
     custom_separators = [
