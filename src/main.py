@@ -1,6 +1,9 @@
 import argparse
 import logging 
 import os
+from pathlib import Path
+
+script_dir = Path(__file__).parent
 logger = logging.getLogger(__name__)
 
 import executor
@@ -19,7 +22,7 @@ if __name__ == "__main__":
     file_path = args.file
     max_attempts = args.max_attempts
 
-    logging.basicConfig(filename='log/logging.log', filemode='w', level=logging.INFO, 
+    logging.basicConfig(filename=f'{script_dir}/log/logging.log', filemode='w', level=logging.INFO, 
                         format='%(asctime)s - %(levelname)s - %(message)s')
     if not os.path.isfile(file_path):
         logger.error(f"Invalid file path: {file_path}")
