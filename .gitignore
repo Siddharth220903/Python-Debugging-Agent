@@ -1,6 +1,6 @@
 .env
 venv/
-**/_pycache_
+**/__pycache__
 retriever/python-3.11.14-docs-text/
 python_docs_vector_db/
 **/log/
