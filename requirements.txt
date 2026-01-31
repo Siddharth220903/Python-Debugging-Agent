@@ -1,10 +1,17 @@
-huggingface_hub
-python-dotenv
+# Core Utilities
+huggingface_hub>=0.26.0,<1.0.0
+python-dotenv==1.2.1
 
-# dependencies for RAG 
-docutils
-langchain-text-splitters
-langchain-chroma
-tqdm
-sentence_transformers
-torch
+# RAG & Document Processing
+docutils==0.22.4
+langchain-text-splitters==1.1.0
+langchain-chroma==0.2.5
+tqdm==4.67.0
+
+# ML & Embeddings
+transformers==4.50.1
+chromadb==1.4.1
+posthog==5.0.0
+sentence-transformers==5.2.2
+
+pytest

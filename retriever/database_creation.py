@@ -2,7 +2,6 @@ from pathlib import Path
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import chromadb
 from chromadb.utils import embedding_functions
-import os
 from tqdm import tqdm
 from pathlib import Path
 script_dir = Path(__file__).parent

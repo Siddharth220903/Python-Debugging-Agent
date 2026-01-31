@@ -1,0 +1,14 @@
+2026-02-01 04:16:28,748 - DebuggingAgent - INFO - We currently support only execution errors in a python file. Starting the application...
+2026-02-01 04:16:28,764 - DebuggingAgent - INFO - Read the parameters:
+File Path: test/sample.py
+Maximum Attempt: 3
+2026-02-01 04:16:28,764 - DebuggingAgent.model_inference - INFO - Initializing inference API from HF.
+2026-02-01 04:16:28,764 - DebuggingAgent.model_inference - INFO - Inference API initialized successfully.
+2026-02-01 04:16:28,764 - DebuggingAgent - INFO - Initialized Inference API
+2026-02-01 04:16:28,764 - DebuggingAgent - INFO - Attempt 1 of 3.
+2026-02-01 04:16:28,764 - DebuggingAgent.executor - INFO - Executing given file on new terminal in Windows OS
+2026-02-01 04:16:28,830 - DebuggingAgent.executor - INFO - Execution of given file completed. Got: 10
+
+2026-02-01 04:16:28,831 - DebuggingAgent - INFO - Completed execution.
+2026-02-01 04:16:28,831 - DebuggingAgent - INFO - Code executed without execution errors.
+2026-02-01 04:16:28,831 - DebuggingAgent - INFO - Debugging process completed successfully.

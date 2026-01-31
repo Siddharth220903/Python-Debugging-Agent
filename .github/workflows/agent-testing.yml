@@ -36,5 +36,9 @@ jobs:
 
             Write-Host "All checks done."
 
+        - name : Run Tests
+          run : |
+            python -m pytest
+
 
 
