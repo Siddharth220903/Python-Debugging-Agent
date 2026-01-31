@@ -5,4 +5,3 @@ retriever/python-3.11.14-docs-text/
 **/logs/
 .pytest_cache
 retriever/python_docs_vector_db/
-retriever/*.zip
