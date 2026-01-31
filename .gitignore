@@ -4,4 +4,4 @@ venv/
 retriever/python-3.11.14-docs-text/
 **/log/
 .pytest_cache
-/python_docs_vector_db/
+**/python_docs_vector_db/
