@@ -19,8 +19,8 @@ class RetrievalTool():
         from chromadb.config import Settings
 
         db_path = str(BASE_DIR / "python_docs_vector_db")
-        self.client = chromadb.PersistentClient(
-            path=db_path,
+        self.client = chromadb.HttpClient(
+            host='localhost', port=8000
         )
         self.emb_fn = embedding_functions.DefaultEmbeddingFunction()
         self.collection = self.client.get_collection(

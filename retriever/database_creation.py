@@ -52,10 +52,12 @@ def chunkContent(all_content):
     return final_chunks
 
 def embdDbStore(chunks): 
-    db_directory = f"{script_dir}/python_docs_vector_db"
+    db_directory = f"python_docs_vector_db"
     
     embedding_model = embedding_functions.DefaultEmbeddingFunction()
-    client = chromadb.PersistentClient(path=db_directory)
+    client = chromadb.HttpClient(
+        host='localhost', port=8000
+        )
 
     # Ensure to create DB only if it doesn't exists
     collection = client.get_or_create_collection(

@@ -1,0 +1,13 @@
+services:
+  chromadb:
+    image: chromadb/chroma:1.4.1
+    container_name: my-chroma-server
+    volumes:
+      - ./python_docs_vector_db:/data
+    ports:
+      - "8000:8000"
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/data        # Explicitly point to the volume path
+      - ANONYMIZED_TELEMETRY=FALSE
+      - ALLOW_RESET=TRUE
