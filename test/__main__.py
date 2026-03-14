@@ -28,7 +28,9 @@ if __name__ == "__main__":
 
 
     model_api_infer = None 
-    model_api_coder = None 
+    model_api_checker = None 
+    model_api_coder = None
+    
 
     for attempt in range(max_attempts):
         logger.info(f"Attempt {attempt + 1} of {max_attempts}.")
@@ -41,6 +43,10 @@ if __name__ == "__main__":
             if model_api_infer is None: 
                 model_api_infer = inference.initializeInferenceAPI()
                 logger.info("Initialized Inference API")
+            
+            if model_api_checker is None: 
+                model_api_checker = inference.initializeCheckerAPI()
+                logger.info("Initialized Checker API")
 
             if model_api_coder is None: 
                 model_api_coder = inference.initializeCoderAPI()
@@ -56,6 +62,20 @@ if __name__ == "__main__":
             )
             logger.info("Correction received from model.")
             logger.info(f"Correction Received: {correction}")
+
+            # Check without error log to avoid bias
+            if model_api_checker is not None: 
+                checkInfo = inference.checkCorrection(
+                    api=model_api_checker, 
+                    code_snippet=code_snippet, 
+                    changes=correction
+                )
+                logger.info("Result received from checker model.")
+                # Failed to pass check
+                if not checkInfo:
+                    logger.info("Inference result doesn't seem great. Trying further attempts...")
+                    continue
+                    
 
             corrected_code = inference.createCode(
                 api=model_api_coder, 
