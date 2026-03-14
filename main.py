@@ -26,8 +26,7 @@ if __name__ == "__main__":
     logger.info(f"Read the parameters:\nFile Path: {file_path}\nMaximum Attempt: {max_attempts}")
 
 
-    model_api = inference.initializeInferenceAPI()
-    logger.info("Initialized Inference API")
+    model_api = None 
 
     for attempt in range(max_attempts):
         logger.info(f"Attempt {attempt + 1} of {max_attempts}.")
@@ -37,6 +36,10 @@ if __name__ == "__main__":
             logger.info("Code executed without execution errors.")
             break
         else:
+            if model_api is None: 
+                model_api = inference.initializeInferenceAPI()
+                logger.info("Initialized Inference API")
+            
             code_snippet = inference.read_python_file(file_path)
             logger.info("Successfully read code.")
 
@@ -49,6 +52,8 @@ if __name__ == "__main__":
             
             inference.write_code_to_file(file_path, correction)
             logger.info("Code written to file.")
+
+    output, success = inference.executePythonFile(file_path)
 
     if not success:
         logger.error("Maximum attempts reached. Code could not be fixed.")

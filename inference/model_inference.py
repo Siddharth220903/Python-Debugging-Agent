@@ -11,6 +11,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 ENV_FILE = BASE_DIR/".env"
 
+tool = None
+
 import retriever
 
 def get_api_key():
@@ -66,9 +68,12 @@ def getCodeCorrection(api: InferenceClient, code_snippet: str, error_message: st
     :return: Corrected code snippet in json format
     :rtype: str
     """
+    global tool 
 
-    logger.info("Initializing Retrieval Tool.")
-    tool = retriever.RetrievalTool()
+    if tool is None:
+        logger.info("Initializing Retrieval Tool.")
+        tool = retriever.RetrievalTool()
+
     try: 
         retrieved_docs = tool.retrieve(terminal_error=error_message)
         logger.info("Successfully retrieved source.")
@@ -97,16 +102,19 @@ def getCodeCorrection(api: InferenceClient, code_snippet: str, error_message: st
             )
         }
     ]
+    
     response = api.chat_completion(
         messages = messages,
         max_tokens=1500
     )
+
     logger.info("Received code correction from inference API.")
 
     try:
         json.loads(response.choices[0].message.content)
         logger.info("Valid JSON format obtained.")
     except json.JSONDecodeError:
+            logger.info("Invalid JSON format from model.")
             raise Exception(f"Invalid JSON format from model.")
 
     
