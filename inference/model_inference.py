@@ -15,6 +15,9 @@ tool = None
 
 import retriever
 
+with open(BASE_DIR / 'model_details.json', 'r') as json_file: 
+     model_details = json.load(json_file)
+
 def get_api_key():
 
     load_dotenv(dotenv_path=ENV_FILE)
@@ -42,12 +45,13 @@ def initializeInferenceAPI() -> InferenceClient:
     """
 
     logger.info("Initializing inference API from HF.")
-    api = get_api_key()
+    api_key = get_api_key()
     try:
         api = InferenceClient(
-            model="meta-llama/Llama-3.1-8B-Instruct", 
-            token=api
+            model=model_details["model_name"], 
+            token=api_key
         )
+
         logger.info("Inference API initialized successfully.")
     except Exception as e:
         logger.error(f"Failed to initialize Inference API: {e}")
@@ -85,12 +89,32 @@ def getCodeCorrection(api: InferenceClient, code_snippet: str, error_message: st
         {
             "role": "system", 
             "content": (
-                "You are an expert Python developer specialized in Python 3.11. "
-                "Your task is to fix the provided code error using the provided Documentation Resources. "
-                "If the Documentation Resources contain specific usage examples or rules, prioritize them. "
-                "Return the response STRICTLY as a JSON object with a single key 'fixed_code'. "
-                "The value must be the complete, corrected Python code as a string. "
-                "Do not include explanations, markdown blocks, or any text outside the JSON structure."
+               """
+                You are an expert Python 3.11 developer. Your task is to analyze the provided code and Documentation Resources to fix errors. 
+                You must retain the original logic of the code. 
+                Return your response STRICTLY as a JSON object containing a three keys "Line", "Tag", and "Change". Each object must follow this schema:
+
+                1. "Line": The integer line number in the original code where the change occurs.
+                2. "Tag": Must be exactly one of: "deleted", "modified", or "created". 
+                - Use "created" to insert a new line AFTER the specified line number.
+                3. "Change": The actual Python code for the new or modified line. For "deleted", provide an empty string.
+
+                Prioritize usage examples from the Documentation Resources. Do not include explanations, markdown blocks, or any text outside the JSON structure.
+
+                Example Output Format:
+                
+                    {
+                    "Line": 12,
+                    "Tag": "modified",
+                    "Change": "    return x + y"
+                    },
+                    {
+                    "Line": 5,
+                    "Tag": "deleted",
+                    "Change": ""
+                    }
+                
+                """
             )
         },
         {
@@ -102,10 +126,31 @@ def getCodeCorrection(api: InferenceClient, code_snippet: str, error_message: st
             )
         }
     ]
+
+    response_format = {
+        "type": "json_object",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "Line": { "type": "integer" },
+                "Tag": { 
+                    "type": "string", 
+                    "enum": ["deleted", "modified", "created"] 
+                },
+                "Change": { "type": "string" }
+            },
+            "required": ["Line", "Tag", "Change"]
+        }
+    }
     
     response = api.chat_completion(
         messages = messages,
-        max_tokens=1500
+        max_tokens=model_details["max_output_token"],
+        response_format={
+            "type": "json_object",
+            "value": response_format
+        }, 
+        stream=False
     )
 
     logger.info("Received code correction from inference API.")

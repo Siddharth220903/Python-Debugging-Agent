@@ -1,0 +1,4 @@
+{
+    "model_name" : "meta-llama/Llama-3.1-8B-Instruct",
+    "max_output_token" : 1500 
+}
