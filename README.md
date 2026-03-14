@@ -1,5 +1,5 @@
 # Debugging-Agent
-This agent implements a Suggestor-Checker-Corrector pipeline. This modular framework is designed to facilitate iterative refinement focusing on multi-agent orchestration.
+This agent implements a Suggestor-Checker-Corrector pipeline. This modular framework is designed to facilitate iterative refinement based on RAG approach focusing on multi-agent orchestration.
 ## Prerequisites
 
 - **Python 3.11+** (tested with 3.11)
