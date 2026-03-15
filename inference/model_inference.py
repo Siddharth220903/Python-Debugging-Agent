@@ -5,6 +5,7 @@ from huggingface_hub import InferenceClient
 import json
 from pathlib import Path
 from .model_utils import get_api_key
+from .model_utils import check_json_format
 
 BASE_DIR = Path(__file__).resolve().parent
 ENV_FILE = BASE_DIR/".env"
@@ -135,12 +136,11 @@ def getCodeCorrection(api: InferenceClient, code_snippet: str, error_message: st
 
     logger.info("Received code correction from inference API.")
 
-    try:
-        json.loads(response.choices[0].message.content)
+    if(check_json_format(response.choices[0].message.content)):
         logger.info("Valid JSON format obtained.")
-    except json.JSONDecodeError:
-            logger.info("Invalid JSON format from model.")
-            raise Exception(f"Invalid JSON format from model.")
+    else:
+        logger.info("Invalid JSON format from model.")
+        return None
 
     
     return response.choices[0].message.content

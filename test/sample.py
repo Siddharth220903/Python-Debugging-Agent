@@ -17,5 +17,3 @@ class DatabaseConnection:
 
         finally:
             print("Cleanup complete")
-
-    # Removed duplicate method

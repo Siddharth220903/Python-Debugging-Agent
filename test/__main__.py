@@ -60,6 +60,9 @@ if __name__ == "__main__":
                 code_snippet=code_snippet, 
                 error_message=output
             )
+            if correction is None: 
+                logger.info("Invalid Inference Obtained. Try again...")
+                continue
             logger.info("Correction received from model.")
             logger.info(f"Correction Received: {correction}")
 
