@@ -8,7 +8,9 @@ import json
 import webbrowser
 from pathlib import Path
 
-from .model_inference import get_api_key, initializeInferenceAPI
+from .model_inference import initializeInferenceAPI
+from .model_utils import get_api_key
+from .model_utils import check_json_format
 
 BASE_DIR = Path(__file__).resolve().parent
 ENV_FILE = BASE_DIR/".env"
@@ -18,14 +20,14 @@ with open(BASE_DIR / 'model_details.json', 'r') as json_file:
 
 def initializeCoderAPI()->InferenceClient: 
     """
-    Initializes the Inference API using the Huggingface Hub.
+    Initializes the Coder API using the Huggingface Hub.
 
     :return: Initialized InferenceClient instance
     :rtype: InferenceClient
     """
 
     logger.info("Initializing coder API from HF.")
-    api_key = get_api_key()
+    api_key = get_api_key("model")
 
     try:
         api = InferenceClient(
@@ -36,45 +38,8 @@ def initializeCoderAPI()->InferenceClient:
         logger.info("Coder API initialized successfully.")
     except Exception as e:
         logger.error(f"Failed to initialize Coder API: {e}")
-        raise Exception(f"Failed to initialize coder API. Please check your HF_API_KEY and internet connection.")
+        raise Exception(f"Failed to initialize coder API. Please check your model and internet connection.")
     return api
-
-def _check_json_format(changes: str) -> bool:
-    """
-    Checks if the provided JSON string has the correct structure for code changes.
-    
-    The expected structure is a JSON object with:
-    - "Line": integer
-    - "Tag": string, one of ["deleted", "modified", "created"]
-    - "Change": string
-    
-    :param changes: JSON string to validate
-    :type changes: str
-    :return: True if the structure is valid, False otherwise
-    :rtype: bool
-    """
-    try:
-        data = json.loads(changes)
-    except json.JSONDecodeError:
-        return False
-    
-    if not isinstance(data, dict):
-        return False
-    
-    required_keys = {"Line", "Tag", "Change"}
-    if set(data.keys()) != required_keys:
-        return False
-    
-    if not isinstance(data["Line"], int):
-        return False
-    
-    if not isinstance(data["Tag"], str) or data["Tag"] not in ["deleted", "modified", "created"]:
-        return False
-    
-    if not isinstance(data["Change"], str):
-        return False
-    
-    return True
 
 def createCode(api: InferenceClient, code_snippet: str, changes : str) -> str: 
     """
@@ -89,7 +54,7 @@ def createCode(api: InferenceClient, code_snippet: str, changes : str) -> str:
     :return: Code correction in specified json format
     :rtype: str
     """
-    if(_check_json_format == False): 
+    if(check_json_format == False): 
         logger.info(f"Invalid format found. Retry the inference....")
         return code_snippet
     

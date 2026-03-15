@@ -1,12 +1,11 @@
 import logging
 logger = logging.getLogger("DebuggingAgent.model_inference")
 
-from dotenv import load_dotenv, set_key
 from huggingface_hub import InferenceClient
-import os
 import json
-import webbrowser
 from pathlib import Path
+from .model_utils import get_api_key
+from .model_utils import check_json_format
 
 BASE_DIR = Path(__file__).resolve().parent
 ENV_FILE = BASE_DIR/".env"
@@ -18,24 +17,6 @@ import retriever
 with open(BASE_DIR / 'model_details.json', 'r') as json_file: 
      model_details = json.load(json_file)
 
-def get_api_key():
-
-    load_dotenv(dotenv_path=ENV_FILE)
-    HF_API_KEY = os.getenv("HF_API_KEY")
-    if not HF_API_KEY:
-        logger.info("No API Key found.")
-        GENERATE_URL = "https://huggingface.co/docs/huggingface_hub/v0.5.1/en/package_reference/hf_api"
-        choice = input("Want to create a new API Key? Enter 'y' or 'n': ")
-        if choice == 'y':
-              logger.info("Opening Browser...")
-              webbrowser.open(GENERATE_URL)
-        HF_API_KEY = input("\nPaste your key here: ")
-        
-        ENV_FILE.touch(exist_ok=True)
-        set_key(str(ENV_FILE), "HF_API_KEY", HF_API_KEY)
-        logger.info("Key saved successfully.")
-    return HF_API_KEY
-
 def initializeInferenceAPI() -> InferenceClient:
     """
     Initializes the Inference API using the Huggingface Hub.
@@ -45,7 +26,7 @@ def initializeInferenceAPI() -> InferenceClient:
     """
 
     logger.info("Initializing inference API from HF.")
-    api_key = get_api_key()
+    api_key = get_api_key("model")
     try:
         api = InferenceClient(
             model=model_details["model_name"], 
@@ -55,7 +36,7 @@ def initializeInferenceAPI() -> InferenceClient:
         logger.info("Inference API initialized successfully.")
     except Exception as e:
         logger.error(f"Failed to initialize Inference API: {e}")
-        raise Exception(f"Failed to initialize Inference API. Please check your HF_API_KEY and internet connection.")
+        raise Exception(f"Failed to initialize Inference API. Please check your model and internet connection.")
     return api
 
 def getCodeCorrection(api: InferenceClient, code_snippet: str, error_message: str) -> str:
@@ -155,12 +136,11 @@ def getCodeCorrection(api: InferenceClient, code_snippet: str, error_message: st
 
     logger.info("Received code correction from inference API.")
 
-    try:
-        json.loads(response.choices[0].message.content)
+    if(check_json_format(response.choices[0].message.content)):
         logger.info("Valid JSON format obtained.")
-    except json.JSONDecodeError:
-            logger.info("Invalid JSON format from model.")
-            raise Exception(f"Invalid JSON format from model.")
+    else:
+        logger.info("Invalid JSON format from model.")
+        return None
 
     
     return response.choices[0].message.content
