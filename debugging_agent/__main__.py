@@ -1,20 +1,22 @@
 import argparse
 from pathlib import Path
 import logging
-import inference
-
-
-BASE_DIR = Path(__file__).resolve().parent
 
 import logger_setup
 logger = logger_setup.setup_logger("DebuggingAgent")
 
+from inference_models.inference_model import InferenceModel
+from inference_models.evaluator_model import EvaluatorModel
+from inference_models.coder_model import CoderModel
+from file_handler.file_handler import FileHandler 
+from code_executor.code_executor import CodeExecutor
 
 if __name__ == "__main__":
 
     """
     Main function to debug a Python file using an AI model.
     """
+    BASE_DIR = Path(__file__).resolve().parent
     logger = logging.getLogger("DebuggingAgent")
     logger.info("We currently support only execution errors in a python file. Starting the application...")
     
@@ -26,38 +28,40 @@ if __name__ == "__main__":
     max_attempts = args.max_attempts
     logger.info(f"Read the parameters:\nFile Path: {file_path}\nMaximum Attempt: {max_attempts}")
 
+    file_handler = FileHandler(file_path=file_path)
+    code_executor = CodeExecutor(file_path=file_path)
 
-    model_api_infer = None 
-    model_api_checker = None 
-    model_api_coder = None
-    
+    inference_model = None 
+    evaluator_model = None 
+    coder_model = None
 
     for attempt in range(max_attempts):
         logger.info(f"Attempt {attempt + 1} of {max_attempts}.")
-        output, success = inference.executePythonFile(file_path)
+        output, success = code_executor.executePythonFile()
         logger.info(f"Completed execution.")
         if success:
             logger.info("Code executed without execution errors.")
             break
-        else:
-            if model_api_infer is None: 
-                model_api_infer = inference.initializeInferenceAPI()
-                logger.info("Initialized Inference API")
-            
-            if model_api_checker is None: 
-                model_api_checker = inference.initializeCheckerAPI()
-                logger.info("Initialized Checker API")
+        else: 
 
-            if model_api_coder is None: 
-                model_api_coder = inference.initializeCoderAPI()
-                logger.info("Initialized Coder API")
-            
-            code_snippet = inference.read_python_file(file_path)
+            logger.info("Code Execution failed.")
+
+            code_snippet = file_handler.readPythonFile()
             logger.info("Successfully read code.")
 
-            correction = inference.getCodeCorrection(
-                api=model_api_infer, 
-                code_snippet=code_snippet, 
+            if inference_model is None:
+                inference_model = InferenceModel(code_snippet=code_snippet)
+                logger.info("Initialized Inference API")
+            
+            if evaluator_model is None: 
+                evaluator_model = EvaluatorModel(code_snippet=code_snippet)
+                logger.info("Initialized Checker API")
+
+            if coder_model is None:
+                coder_model = CoderModel(code_snippet=code_snippet)
+                logger.info("Initialized Coder API")
+            
+            correction = inference_model.modelInference(
                 error_message=output
             )
             if correction is None: 
@@ -67,10 +71,8 @@ if __name__ == "__main__":
             logger.info(f"Correction Received: {correction}")
 
             # Check without error log to avoid bias
-            if model_api_checker is not None: 
-                checkInfo = inference.checkCorrection(
-                    api=model_api_checker, 
-                    code_snippet=code_snippet, 
+            if evaluator_model is not None: 
+                checkInfo = evaluator_model.modelInference(
                     changes=correction
                 )
                 logger.info("Result received from checker model.")
@@ -80,18 +82,16 @@ if __name__ == "__main__":
                     continue
                     
 
-            corrected_code = inference.createCode(
-                api=model_api_coder, 
-                code_snippet=code_snippet, 
+            corrected_code = coder_model.modelInference(
                 changes=correction
             )
 
             logger.info(corrected_code)
             
-            inference.write_code_to_file(file_path, corrected_code)
+            file_handler.writeCodeToFile(corrected_code)
             logger.info("Code written to file.")
 
-    output, success = inference.executePythonFile(file_path)
+    output, success = code_executor.executePythonFile()
 
     if not success:
         logger.error("Maximum attempts reached. Code could not be fixed.")
