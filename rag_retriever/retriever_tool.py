@@ -3,7 +3,6 @@ logger = logging.getLogger("DebuggingAgent.retriever")
 
 from pathlib import Path
 
-BASE_DIR  = Path(__file__).resolve().parent
 import re
 import numpy as np
 
@@ -17,8 +16,8 @@ class RetrievalTool():
         import chromadb
         from chromadb.utils import embedding_functions
         from chromadb.config import Settings
-
-        db_path = str(BASE_DIR / "python_docs_vector_db")
+        BASE_DIR  = Path(__file__).resolve().parent
+        db_path = BASE_DIR / "../docker_dataset/python_docs_vector_db"
         self.client = chromadb.HttpClient(
             host='localhost', port=8000
         )

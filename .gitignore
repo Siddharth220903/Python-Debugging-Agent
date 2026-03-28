@@ -1,7 +1,7 @@
-.env
+**/.env
 venv/
 **/__pycache__
-retriever/python-3.11.14-docs-text/
+database_creation/python-3.11.14-docs-text/
 **/logs/
 .pytest_cache
 **/python_docs_vector_db/

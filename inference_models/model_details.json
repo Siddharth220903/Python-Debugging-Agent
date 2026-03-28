@@ -2,8 +2,8 @@
     "model_name" : "meta-llama/Llama-3.1-8B-Instruct",
     "max_output_token" : 1500,
     "model_webpage" : "https://huggingface.co/docs/huggingface_hub/v0.5.1/en/package_reference/hf_api", 
-    "checker_model_name" : "gemini-2.5-flash",
-    "max_output_token_checker" : 1500,
-    "checker_model_webpage" : "https://aistudio.google.com/api-keys",
-    "checker_threshold" : 6
+    "evaluator_model_name" : "gemini-2.5-flash",
+    "max_output_token_evaluator" : 1500,
+    "evaluator_model_webpage" : "https://aistudio.google.com/api-keys",
+    "evaluator_threshold" : 6
 }
