@@ -8,7 +8,7 @@ class DatabaseConnection:
         pass
 
 async def process_data(data: list[int]) -> int:
-    processed = [await x for x in data]
+    processed = [await x for x in data if isinstance(x, asyncio.Task)]
 
     try:
         with DatabaseConnection() as db:

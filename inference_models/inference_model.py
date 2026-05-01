@@ -85,6 +85,7 @@ class InferenceModel(LLMModel):
 
         try: 
             retrieved_docs = self.retreiver_tool.retrieve(terminal_error=error_message)
+            logger.info(retrieved_docs)
             logger.info("Successfully retrieved source.")
         except NoDocumentError:
             retrieved_docs = ""

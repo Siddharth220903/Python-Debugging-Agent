@@ -73,7 +73,7 @@ class RetrievalTool():
         scores = self.sigmoid(raw_scores)
         ranked = sorted(zip(scores, candidates, metadatas), key=lambda x: x[0], reverse=True)
         top_score, top_doc, top_meta = ranked[0]
-        if top_score > self.confidence_threshold:
+        if top_score < self.confidence_threshold:
             raise NoDocumentError()
         
         print(f"Got a document with score: {top_score}")
